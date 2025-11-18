@@ -1,4 +1,4 @@
-// src/pages/Dashboard/AdminDashboard.tsx
+// src/pages/Admin/AdminDashboard.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -28,7 +28,6 @@ import {
   VideoCall,
   TrendingUp,
   Notifications,
-  ArrowForward,
   Person,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -95,7 +94,17 @@ const AdminDashboard: React.FC = () => {
       setError('');
       const token = localStorage.getItem('token');
       
-      // Fetch all data in parallel
+      if (!token) {
+        setError('No authentication token found');
+        setLoading(false);
+        return;
+      }
+
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
+
+      // Fetch all data in parallel using your actual endpoints
       const [
         employeesRes, 
         departmentsRes, 
@@ -104,40 +113,45 @@ const AdminDashboard: React.FC = () => {
         meetingsRes,
         leavesRes
       ] = await Promise.all([
-        axios.get('http://localhost:5000/api/admin/employees', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/departments', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/requests', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/payroll', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/meetings', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/leaves', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        axios.get('http://localhost:5000/api/admin/employees', config).catch(_err => ({ data: [] })),
+        axios.get('http://localhost:5000/api/departments', config).catch(_err => ({ data: [] })),
+        axios.get('http://localhost:5000/api/requests', config).catch(_err => ({ data: [] })),
+        axios.get('http://localhost:5000/api/payroll', config).catch(_err => ({ data: [] })),
+        axios.get('http://localhost:5000/api/meetings', config).catch(_err => ({ data: [] })),
+        axios.get('http://localhost:5000/api/leaves', config).catch(_err => ({ data: [] }))
       ]);
 
+      // Extract data from responses
       const employees = employeesRes.data || [];
       const departments = departmentsRes.data || [];
-      const requests = requestsRes.data?.data || requestsRes.data || [];
-      const payrolls = payrollRes.data || [];
-      const meetings = meetingsRes.data || [];
-      const leaves = leavesRes.data || [];
+      const requests = Array.isArray(requestsRes.data) ? requestsRes.data : [];
+      const payrolls = Array.isArray(payrollRes.data) ? payrollRes.data : [];
+      const meetings = Array.isArray(meetingsRes.data) ? meetingsRes.data : [];
+      const leaves = Array.isArray(leavesRes.data) ? leavesRes.data : [];
+
+      console.log('Dashboard Data:', {
+        employees: employees.length,
+        departments: departments.length,
+        requests: requests.length,
+        payrolls: payrolls.length,
+        meetings: meetings.length,
+        leaves: leaves.length
+      });
 
       // Calculate stats from real data
-      const activeEmployees = employees.filter((emp: any) => emp.is_active).length;
-      const pendingRequests = requests.filter((req: any) => req.status === 'PENDING').length;
-      const totalPayroll = payrolls.reduce((sum: number, payroll: any) => sum + (payroll.total || 0), 0);
-      const upcomingMeetings = meetings.filter((meeting: any) => 
-        new Date(meeting.date_time) > new Date()
+      const activeEmployees = employees.filter((emp: any) => emp.is_active !== false).length;
+      const pendingRequests = requests.filter((req: any) => 
+        req.status === 'PENDING' || req.status === 'pending'
       ).length;
+      
+      const totalPayroll = payrolls.reduce((sum: number, payroll: any) => 
+        sum + (parseFloat(payroll.total_amount) || parseFloat(payroll.total) || 0), 0
+      );
+      
+      const upcomingMeetings = meetings.filter((meeting: any) => {
+        const meetingDate = meeting.date_time || meeting.meeting_date || meeting.date;
+        return meetingDate && new Date(meetingDate) > new Date();
+      }).length;
 
       setStats({
         totalEmployees: employees.length,
@@ -152,92 +166,111 @@ const AdminDashboard: React.FC = () => {
       // Generate recent activities from real data
       const activities: RecentActivity[] = [];
 
-      // Add recent requests
-      requests.slice(0, 2).forEach((req: any) => {
+      // Add recent requests (from /api/requests)
+      requests.slice(0, 3).forEach((req: any) => {
         activities.push({
-          id: req.request_id,
+          id: req.request_id || req.id,
           type: 'request',
-          title: `${req.category} Request`,
-          description: `From ${req.employee_name || 'Employee'}`,
-          time: formatTimeAgo(req.created_at),
-          status: req.status === 'PENDING' ? 'pending' : 
-                  req.status === 'IN_PROGRESS' ? 'in-progress' : 'completed'
+          title: `${req.request_type || req.category || 'General'} Request`,
+          description: `From ${req.employee_name || req.requester_name || 'Employee'}`,
+          time: formatTimeAgo(req.created_at || req.submission_date),
+          status: (req.status === 'PENDING' || req.status === 'pending') ? 'pending' : 
+                  (req.status === 'IN_PROGRESS' || req.status === 'in-progress') ? 'in-progress' : 'completed'
         });
       });
 
-      // Add upcoming meetings
+      // Add upcoming meetings (from /api/meetings)
       meetings.slice(0, 2).forEach((meeting: any) => {
-        if (new Date(meeting.date_time) > new Date()) {
+        const meetingDate = meeting.date_time || meeting.meeting_date;
+        if (meetingDate && new Date(meetingDate) > new Date()) {
           activities.push({
-            id: meeting.meeting_id,
+            id: meeting.meeting_id || meeting.id,
             type: 'meeting',
-            title: meeting.title,
-            description: `Scheduled for ${formatDateTime(meeting.date_time)}`,
-            time: formatTimeAgo(meeting.created_at),
+            title: meeting.title || meeting.meeting_title || 'Meeting',
+            description: `Scheduled for ${formatDateTime(meetingDate)}`,
+            time: formatTimeAgo(meeting.created_at || meeting.created_date),
             status: 'upcoming'
           });
         }
       });
 
-      // Add recent payroll activities
+      // Add recent payroll activities (from /api/payroll)
       if (payrolls.length > 0) {
         const recentPayroll = payrolls[0];
         activities.push({
-          id: recentPayroll.payroll_id,
+          id: recentPayroll.payroll_id || recentPayroll.id,
           type: 'payroll',
           title: 'Payroll Processed',
-          description: `Total: ₹${recentPayroll.total?.toLocaleString()}`,
-          time: formatTimeAgo(recentPayroll.created_at),
+          description: `Total: ₹${(recentPayroll.total_amount || recentPayroll.total || 0).toLocaleString()}`,
+          time: formatTimeAgo(recentPayroll.created_at || recentPayroll.processed_date),
           status: 'completed'
         });
       }
 
-      // Add leave requests
+      // Add leave requests (from /api/leaves)
       leaves.slice(0, 2).forEach((leave: any) => {
-        if (leave.status === 'PENDING') {
+        if (leave.status === 'PENDING' || leave.status === 'pending') {
           activities.push({
-            id: leave.leave_id,
+            id: leave.leave_id || leave.id,
             type: 'leave',
             title: 'Leave Request',
-            description: `${leave.employee_name} - ${leave.type}`,
-            time: formatTimeAgo(leave.created_at),
+            description: `${leave.employee_name || 'Employee'} - ${leave.leave_type || leave.type}`,
+            time: formatTimeAgo(leave.created_at || leave.application_date),
             status: 'pending'
           });
         }
       });
 
-      setRecentActivities(activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 6));
+      // Sort by time and limit to 6 activities
+      const sortedActivities = activities
+        .filter(activity => activity.time !== 'Invalid date')
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .slice(0, 6);
+
+      setRecentActivities(sortedActivities);
 
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
-      setError(error.response?.data?.message || 'Failed to load dashboard data');
+      setError(error.response?.data?.message || error.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
 
   const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+    if (!dateString) return 'Recently';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Recently';
+      
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minutes ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    if (diffDays === 1) return '1 day ago';
-    return `${diffDays} days ago`;
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins} minutes ago`;
+      if (diffHours < 24) return `${diffHours} hours ago`;
+      if (diffDays === 1) return '1 day ago';
+      return `${diffDays} days ago`;
+    } catch {
+      return 'Recently';
+    }
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      return new Date(dateString).toLocaleDateString('en-IN', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'Date not available';
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -254,43 +287,43 @@ const AdminDashboard: React.FC = () => {
       value: stats.totalEmployees,
       icon: <People sx={{ fontSize: 24 }} />,
       color: '#667eea',
-      path: '/admin/employees',
-      change: Math.round((stats.activeEmployees / stats.totalEmployees) * 100)
+      path: '/employees',
+      change: stats.totalEmployees > 0 ? Math.round((stats.activeEmployees / stats.totalEmployees) * 100) : 0
     },
     {
       label: 'Departments',
       value: stats.totalDepartments,
       icon: <Business sx={{ fontSize: 24 }} />,
       color: '#764ba2',
-      path: '/admin/departments'
+      path: '/departments'
     },
     {
       label: 'Pending Requests',
       value: stats.pendingRequests,
       icon: <Assignment sx={{ fontSize: 24 }} />,
       color: '#f093fb',
-      path: '/admin/requests'
+      path: '/requests'
     },
     {
       label: 'Total Payroll',
       value: stats.totalPayroll,
       icon: <AttachMoney sx={{ fontSize: 24 }} />,
       color: '#4ecdc4',
-      path: '/admin/payroll'
+      path: '/payroll'
     },
     {
       label: 'Upcoming Meetings',
       value: stats.upcomingMeetings,
       icon: <VideoCall sx={{ fontSize: 24 }} />,
       color: '#45b7d1',
-      path: '/admin/meetings'
+      path: '/meetings'
     },
     {
       label: 'Leave Requests',
       value: stats.totalLeaves,
       icon: <CalendarToday sx={{ fontSize: 24 }} />,
       color: '#ff6b6b',
-      path: '/admin/leaves'
+      path: '/leaves'
     }
   ];
 
@@ -333,7 +366,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <Box>
       <Sidebar />
-      <Box sx={{ flexGrow: 1, p: isMobile ? 2 : 3 }}>
+      <Box component="main" sx={{ flexGrow: 1, p: isMobile ? 2 : 3 }}>
         {/* Header Section */}
         <MotionPaper
           initial={{ opacity: 0, y: -20 }}
@@ -358,6 +391,13 @@ const AdminDashboard: React.FC = () => {
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <TrendingUp sx={{ fontSize: 32, opacity: 0.9 }} />
+              <Button 
+                variant="outlined" 
+                sx={{ color: 'white', borderColor: 'white' }}
+                onClick={fetchDashboardData}
+              >
+                Refresh Data
+              </Button>
             </Box>
           </Box>
         </MotionPaper>
@@ -371,7 +411,7 @@ const AdminDashboard: React.FC = () => {
         {/* Quick Stats Grid */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {quickStats.map((stat, index) => (
-            <Grid key={stat.label} size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
+            <Grid size={{ xs:12,sm:6, md:4, lg:2}} key={stat.label}>
               <MotionCard
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -404,12 +444,12 @@ const AdminDashboard: React.FC = () => {
                     {stat.icon}
                   </Box>
                   <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    {stat.label === 'Total Payroll' ? formatCurrency(stat.value) : stat.value}
+                    {stat.label === 'Total Payroll' ? formatCurrency(stat.value) : stat.value.toLocaleString()}
                   </Typography>
                   <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
                     {stat.label}
                   </Typography>
-                  {stat.change && (
+                  {stat.change !== undefined && stat.change > 0 && (
                     <Chip
                       label={`${stat.change}% active`}
                       color="success"
@@ -425,7 +465,7 @@ const AdminDashboard: React.FC = () => {
 
         <Grid container spacing={3}>
           {/* Recent Activities */}
-          <Grid size={{ xs: 12, lg: 8 }}>
+          <Grid size={{ xs:12,lg:8}}>
             <MotionPaper
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -441,19 +481,13 @@ const AdminDashboard: React.FC = () => {
                 <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                   Recent Activities
                 </Typography>
-                <Button 
-                  endIcon={<ArrowForward />}
-                  onClick={() => handleQuickAction('/admin/requests')}
-                >
-                  View All
-                </Button>
               </Box>
 
               <List sx={{ maxHeight: 400, overflow: 'auto' }}>
                 {recentActivities.length > 0 ? (
                   recentActivities.map((activity, index) => (
                     <MotionPaper
-                      key={activity.id}
+                      key={`${activity.id}-${index}`}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -465,14 +499,14 @@ const AdminDashboard: React.FC = () => {
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                               <Typography variant="subtitle1" fontWeight="500">
                                 {activity.title}
                               </Typography>
                               {activity.status && (
                                 <Chip
                                   label={activity.status.replace('-', ' ').toUpperCase()}
-                                  color={getStatusColor(activity.status)}
+                                  color={getStatusColor(activity.status) as any}
                                   size="small"
                                 />
                               )}
@@ -508,7 +542,7 @@ const AdminDashboard: React.FC = () => {
           </Grid>
 
           {/* System Overview */}
-          <Grid size={{ xs: 12, lg: 4 }}>
+          <Grid size={{ xs:12,lg:4}}>
             <MotionPaper
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -570,7 +604,7 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <LinearProgress 
                   variant="determinate" 
-                  value={(stats.activeEmployees / stats.totalEmployees) * 100} 
+                  value={stats.totalEmployees > 0 ? (stats.activeEmployees / stats.totalEmployees) * 100 : 0} 
                   sx={{ 
                     height: 8, 
                     borderRadius: 4,
@@ -590,7 +624,7 @@ const AdminDashboard: React.FC = () => {
                   <Button 
                     variant="contained" 
                     size="small"
-                    onClick={() => handleQuickAction('/admin/employees/new')}
+                    onClick={() => handleQuickAction('/employees/new')}
                     sx={{ 
                       backgroundColor: 'rgba(255,255,255,0.9)',
                       color: 'primary.main',
@@ -602,7 +636,7 @@ const AdminDashboard: React.FC = () => {
                   <Button 
                     variant="contained" 
                     size="small"
-                    onClick={() => handleQuickAction('/admin/meetings/create')}
+                    onClick={() => handleQuickAction('/meetings/create')}
                     sx={{ 
                       backgroundColor: 'rgba(255,255,255,0.9)',
                       color: 'primary.main',
@@ -614,7 +648,7 @@ const AdminDashboard: React.FC = () => {
                   <Button 
                     variant="contained" 
                     size="small"
-                    onClick={() => handleQuickAction('/admin/payroll/new')}
+                    onClick={() => handleQuickAction('/payroll/new')}
                     sx={{ 
                       backgroundColor: 'rgba(255,255,255,0.9)',
                       color: 'primary.main',

@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import './App.css';
 import type { JSX } from 'react';
 import Dashboard from './pages/Admin/Dashboard';
+import NotFoundPage from './pages/NotFound/NotFoundPage';
 
 const ProtectedRoute = ({ children, role }: { children: JSX.Element; role?: string }) => {
   const { user } = useAuth();
@@ -45,7 +46,7 @@ function App() {
             }
           /> */}
 
-          <Route path="*" element={<div>404 - Page Not Found</div>} />
+          <Route path="*" element={<NotFoundPage /> }/>
         </Routes>
       </AuthProvider>
     </Router>

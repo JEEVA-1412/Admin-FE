@@ -1,4 +1,3 @@
-// src/pages/Admin/AdminDashboard.tsx
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
@@ -18,7 +17,7 @@ import ProjectDetails from '../Project/ProjectDetails';
 import ProjectAssignment from '../Project/ProjectAssignment';
 import AdminAttendance from '../Attendance/AdminAttendance';
 import AdminDashboard from './AdminDashboard';
-// import HrDashboard from './HrDashboard';
+import ProfilePage from '../Profile/ProfilePage';
 
 
 const Dashboard: React.FC = () => {
@@ -28,7 +27,7 @@ const Dashboard: React.FC = () => {
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Routes>
           <Route path="/dashboard" element={<AdminDashboard />} />
-          {/* <Route path="/Hdashboard" element={<HrDashboard />} /> */}
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/employees" element={<EmployeeList />} />
           <Route path="/employees/new" element={<EmployeeForm />} />
           <Route path="/employees/edit/:id" element={<EmployeeForm />} />
@@ -46,7 +45,6 @@ const Dashboard: React.FC = () => {
           <Route path="/projects/edit/:id" element={<ProjectForm />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />
           <Route path="/projects/:id/assign" element={<ProjectAssignment />} />
-          {/* <Route path="/projects/:id/assign-departments" element={<ProjectDepartmentAssignment />} /> */}
         </Routes>
       </Box>
     </Box>

@@ -20,7 +20,8 @@ import {
   MeetingRoom,
   RequestPage,
   AccessTime,
-  EventNote
+  EventNote,
+  Person // Add this import for profile icon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -79,6 +80,36 @@ const Sidebar: React.FC = () => {
     }
   };
 
+  // Fix for dropdown display state
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  const handleProfileNavigation = () => {
+    navigate('/admin/profile');
+    setDropdownOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setDropdownOpen(false);
+  };
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = () => {
+      setDropdownOpen(false);
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
   return (
     <Drawer
       variant="permanent"
@@ -129,19 +160,8 @@ const Sidebar: React.FC = () => {
               mb: 2,
               cursor: 'pointer',
               position: 'relative',
-              '&:hover': {
-                '& .profile-dropdown': {
-                  display: 'block'
-                }
-              }
             }}
-            onClick={(e) => {
-              // Toggle dropdown on click
-              const dropdown = e.currentTarget.querySelector('.profile-dropdown') as HTMLElement;
-              if (dropdown) {
-                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-              }
-            }}
+            onClick={handleProfileClick}
           >
             <Avatar
               sx={{
@@ -158,10 +178,10 @@ const Sidebar: React.FC = () => {
                 }
               }}
             >
-              {user.name?.charAt(0).toUpperCase()}
+              {user.name?.charAt(0).toUpperCase() || user.username?.charAt(0).toUpperCase() || 'U'}
             </Avatar>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-              {user.name}
+              {user.name || user.username || 'User'}
             </Typography>
             <Chip
               label={user.role}
@@ -175,70 +195,78 @@ const Sidebar: React.FC = () => {
             />
 
             {/* Dropdown Menu */}
-            <Box
-              className="profile-dropdown"
-              sx={{
-                display: 'none',
-                position: 'absolute',
-                top: '100%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '160px',
-                backgroundColor: '#2c3e50',
-                borderRadius: 2,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                overflow: 'hidden',
-                zIndex: 1000,
-                mt: 1,
-                border: '1px solid rgba(255,255,255,0.1)'
-              }}
-            >
-              <List sx={{ p: 0 }}>
-                <ListItem
-                  component="div"
-                  onClick={() => navigate('/profile')}
-                  sx={{
-                    cursor: 'pointer',
-                    py: 1.5,
-                    color: 'white'
-                  }}
-                >
-                  <ListItemText
-                    primary="Profile"
+            {dropdownOpen && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '160px',
+                  backgroundColor: '#2c3e50',
+                  borderRadius: 2,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                  overflow: 'hidden',
+                  zIndex: 1000,
+                  mt: 1,
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}
+              >
+                <List sx={{ p: 0 }}>
+                  <ListItem
+                    component="div"
+                    onClick={handleProfileNavigation}
                     sx={{
-                      textAlign: 'center',
-                      '& .MuiTypography-root': {
-                        fontSize: '0.9rem',
-                        fontWeight: 500,
-                        color: 'white'
+                      cursor: 'pointer',
+                      py: 1.5,
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.1)'
                       }
                     }}
-                  />
-                </ListItem>
-                <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
-                <ListItem
-                  component="div"
-                  onClick={logout}
-                  sx={{
-                    cursor: 'pointer',
-                    py: 1.5,
-                    color: '#ff6b6b'
-                  }}
-                >
-                  <ListItemText
-                    primary="Logout"
+                  >
+                    <ListItemIcon sx={{ minWidth: 35, color: 'white' }}>
+                      <Person fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Profile"
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          color: 'white'
+                        }
+                      }}
+                    />
+                  </ListItem>
+                  <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
+                  <ListItem
+                    component="div"
+                    onClick={handleLogout}
                     sx={{
-                      textAlign: 'center',
-                      '& .MuiTypography-root': {
-                        fontSize: '0.9rem',
-                        fontWeight: 500,
-                        color: '#ff6b6b'
+                      cursor: 'pointer',
+                      py: 1.5,
+                      color: '#ff6b6b',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,107,107,0.1)'
                       }
                     }}
-                  />
-                </ListItem>
-              </List>
-            </Box>
+                  >
+                    <ListItemText
+                      primary="Logout"
+                      sx={{
+                        textAlign: 'center',
+                        '& .MuiTypography-root': {
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          color: '#ff6b6b'
+                        }
+                      }}
+                    />
+                  </ListItem>
+                </List>
+              </Box>
+            )}
           </Box>
         </motion.div>
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
@@ -319,7 +347,6 @@ const Sidebar: React.FC = () => {
           </AnimatePresence>
         </List>
       </Box>
-
     </Drawer>
   );
 };
