@@ -22,7 +22,7 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/Admin-FE/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           {/* <Route path="/register" element={<RegisterPage />} /> */}
 
