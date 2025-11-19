@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // API Service
 const attendanceAPI = {
   async getAttendance(filters: { department?: string; date?: string; status?: string }) {
-    const API_BASE_URL = 'http://localhost:5000';
+    const API_BASE_URL = 'https://admin-be-qe74.onrender.com';
     
     const response = await fetch(`${API_BASE_URL}/api/attendance`, {
       method: 'POST',
@@ -32,7 +32,7 @@ const attendanceAPI = {
   },
 
   async getDepartments() {
-    const API_BASE_URL = 'http://localhost:5000';
+    const API_BASE_URL = 'https://admin-be-qe74.onrender.com';
     
     const token = localStorage.getItem('token');
     const response = await fetch(`${API_BASE_URL}/api/departments`, {

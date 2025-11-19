@@ -50,7 +50,7 @@ const ProjectForm: React.FC = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:5000/api/projects/${projectId}`, {
+            const response = await fetch(`https://admin-be-qe74.onrender.com/api/projects/${projectId}`, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
@@ -133,8 +133,8 @@ const ProjectForm: React.FC = () => {
             setError('');
             const token = localStorage.getItem("token");
             const url = isEdit
-                ? `http://localhost:5000/api/projects/${id}`
-                : "http://localhost:5000/api/projects";
+                ? `https://admin-be-qe74.onrender.com/api/projects/${id}`
+                : "https://admin-be-qe74.onrender.com/api/projects";
 
             const method = isEdit ? "PUT" : "POST";
 

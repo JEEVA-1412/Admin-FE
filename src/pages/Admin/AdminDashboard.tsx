@@ -113,12 +113,18 @@ const AdminDashboard: React.FC = () => {
         meetingsRes,
         leavesRes
       ] = await Promise.all([
-        axios.get('http://localhost:5000/api/admin/employees', config).catch(_err => ({ data: [] })),
-        axios.get('http://localhost:5000/api/departments', config).catch(_err => ({ data: [] })),
-        axios.get('http://localhost:5000/api/requests', config).catch(_err => ({ data: [] })),
-        axios.get('http://localhost:5000/api/payroll', config).catch(_err => ({ data: [] })),
-        axios.get('http://localhost:5000/api/meetings', config).catch(_err => ({ data: [] })),
-        axios.get('http://localhost:5000/api/leaves', config).catch(_err => ({ data: [] }))
+        // axios.get('http://localhost:5000/api/admin/employees', config).catch(_err => ({ data: [] })),
+        // axios.get('http://localhost:5000/api/departments', config).catch(_err => ({ data: [] })),
+        // axios.get('http://localhost:5000/api/requests', config).catch(_err => ({ data: [] })),
+        // axios.get('http://localhost:5000/api/payroll', config).catch(_err => ({ data: [] })),
+        // axios.get('http://localhost:5000/api/meetings', config).catch(_err => ({ data: [] })),
+        // axios.get('http://localhost:5000/api/leaves', config).catch(_err => ({ data: [] }))
+        axios.get('https://admin-be-qe74.onrender.com/api/admin/employees', config).catch(_err => ({ data: [] })),
+        axios.get('https://admin-be-qe74.onrender.com/api/departments', config).catch(_err => ({ data: [] })),
+        axios.get('https://admin-be-qe74.onrender.com/api/requests', config).catch(_err => ({ data: [] })),
+        axios.get('https://admin-be-qe74.onrender.com/api/payroll', config).catch(_err => ({ data: [] })),
+        axios.get('https://admin-be-qe74.onrender.com/meetings', config).catch(_err => ({ data: [] })),
+        axios.get('https://admin-be-qe74.onrender.com/leaves', config).catch(_err => ({ data: [] }))
       ]);
 
       // Extract data from responses

@@ -84,7 +84,7 @@ const LeaveList: React.FC = () => {
   const fetchLeaves = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/leaves', {
+      const response = await axios.get('https://admin-be-qe74.onrender.com/api/leaves', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setLeaves(response.data);
@@ -99,7 +99,7 @@ const LeaveList: React.FC = () => {
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/departments', {
+      const response = await axios.get('https://admin-be-qe74.onrender.com/api/departments', {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Extract department names from the response
@@ -199,7 +199,7 @@ const LeaveList: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:5000/api/leaves/${statusDialog.leave.leave_id}/status`,
+        `https://admin-be-qe74.onrender.com/api/leaves/${statusDialog.leave.leave_id}/status`,
         { status: statusDialog.action.toUpperCase() },
         {
           headers: {
@@ -228,7 +228,7 @@ const LeaveList: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/leaves/${id}`, {
+      await axios.delete(`https://admin-be-qe74.onrender.com/api/leaves/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccess('Leave record deleted successfully!');

@@ -85,7 +85,7 @@ const AdminRequests: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await axios.get("http://localhost:5000/api/requests", {
+      const res = await axios.get("https://admin-be-qe74.onrender.com/api/requests", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRequests(res.data.data);
@@ -102,7 +102,7 @@ const AdminRequests: React.FC = () => {
   const updateStatus = async (id: number, newStatus: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/requests/${id}/status`, {
+      await axios.put(`https://admin-be-qe74.onrender.com/api/requests/${id}/status`, {
         status: newStatus,
       }, {
         headers: { Authorization: `Bearer ${token}` }

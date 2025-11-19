@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/Admin-FE/',
   // server: {
-  //   port: 3000,
+  //   port: 3001,
   //   open: true
   // }
 })

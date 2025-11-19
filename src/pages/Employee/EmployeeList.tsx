@@ -80,7 +80,7 @@ const EmployeeList: React.FC = () => {
     const fetchCurrentUser = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/auth/me', {
+            const response = await axios.get('https://admin-be-qe74.onrender.com/api/auth/me', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setCurrentUser(response.data);
@@ -102,10 +102,10 @@ const EmployeeList: React.FC = () => {
             if (!user) return;
 
             const token = localStorage.getItem('token');
-            let url = 'http://localhost:5000/api/admin/employees';
+            let url = 'https://admin-be-qe74.onrender.com/api/admin/employees';
 
             if (user.role === 'HR') {
-                url = 'http://localhost:5000/api/hr/employees';
+                url = 'https://admin-be-qe74.onrender.com/api/hr/employees';
             }
 
             const response = await axios.get(url, {
@@ -204,10 +204,10 @@ const EmployeeList: React.FC = () => {
 
         try {
             const token = localStorage.getItem('token');
-            let url = `http://localhost:5000/api/admin/employees/${id}`;
+            let url = `https://admin-be-qe74.onrender.com/api/admin/employees/${id}`;
 
             if (currentUser?.role === 'HR') {
-                url = `http://localhost:5000/api/hr/employees/${id}`;
+                url = `https://admin-be-qe74.onrender.com/api/hr/employees/${id}`;
             }
 
             await axios.delete(url, {

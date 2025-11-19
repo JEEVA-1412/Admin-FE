@@ -64,7 +64,7 @@ const MeetingPage: React.FC = () => {
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/departments', {
+      const response = await axios.get('https://admin-be-qe74.onrender.com/api/departments', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDepartments(response.data);
@@ -110,7 +110,7 @@ const MeetingPage: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       
-      await axios.post('http://localhost:5000/api/meetings', formData, {
+      await axios.post('https://admin-be-qe74.onrender.com/api/meetings', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

@@ -24,7 +24,7 @@ const MeetingAttendancePage: React.FC = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/meeting-attendance")
+      .get("https://admin-be-qe74.onrender.com/api/meeting-attendance")
       .then((res) => {
         setMeetings(res.data);
         setFilteredMeetings(res.data);
@@ -46,7 +46,7 @@ const MeetingAttendancePage: React.FC = () => {
     setSelectedMeeting(meetingId);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/meeting-attendance/${meetingId}`
+        `https://admin-be-qe74.onrender.com/api/meeting-attendance/${meetingId}`
       );
       setAttendance(res.data);
     } catch (error) {

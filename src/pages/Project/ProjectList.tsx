@@ -63,7 +63,7 @@ const ProjectList: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/projects", {
+      const response = await fetch("https://admin-be-qe74.onrender.com/api/projects", {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -142,7 +142,7 @@ const ProjectList: React.FC = () => {
   const handleDelete = async (projectId: number) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/projects/${projectId}`, {
+      const response = await fetch(`https://admin-be-qe74.onrender.com/api/projects/${projectId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`,

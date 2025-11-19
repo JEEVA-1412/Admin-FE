@@ -47,7 +47,7 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const response = await axios.post('https://admin-be-qe74.onrender.com/api/auth/login', formData);
       const { user, token } = response.data;
       login(user, token);
     } catch (err: any) {

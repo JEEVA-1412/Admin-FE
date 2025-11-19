@@ -59,7 +59,7 @@ const ProjectDetails: React.FC = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:5000/api/projects/${id}`, {
+            const response = await fetch(`https://admin-be-qe74.onrender.com/api/projects/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
@@ -90,7 +90,7 @@ const ProjectDetails: React.FC = () => {
         try {
             setAssignmentsLoading(true);
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:5000/api/project-assignments/project/${id}`, {
+            const response = await fetch(`https://admin-be-qe74.onrender.com/api/project-assignments/project/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"

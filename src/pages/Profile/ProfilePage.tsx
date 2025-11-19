@@ -153,14 +153,14 @@ const ProfilePage: React.FC = () => {
       };
 
       // Fetch user profile
-      const profileRes = await axios.get('http://localhost:5000/api/auth/me', config);
+      const profileRes = await axios.get('https://admin-be-qe74.onrender.com/api/auth/me', config);
       setProfile(profileRes.data);
       setEditData(profileRes.data);
 
       // Fetch leaves for employee
       if (profileRes.data.role === 'EMPLOYEE') {
         try {
-          const leavesRes = await axios.get('http://localhost:5000/api/leaves/my-leaves', config);
+          const leavesRes = await axios.get('https://admin-be-qe74.onrender.com/api/leaves/my-leaves', config);
           setLeaves(leavesRes.data || []);
         } catch (err) {
           console.log('No leaves data available');
@@ -174,7 +174,7 @@ const ProfilePage: React.FC = () => {
           const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
           const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
           
-          const attendanceRes = await axios.post('http://localhost:5000/api/attendance', {
+          const attendanceRes = await axios.post('https://admin-be-qe74.onrender.com/api/attendance', {
             start_date: firstDay.toISOString().split('T')[0],
             end_date: lastDay.toISOString().split('T')[0],
             employee_id: profileRes.data.employee?.emp_id
@@ -233,7 +233,7 @@ const ProfilePage: React.FC = () => {
 
 
       // Password change endpoint would need to be implemented
-      // await axios.put('http://localhost:5000/api/auth/change-password', {
+      // await axios.put('https://admin-be-qe74.onrender.com/api/auth/change-password', {
       //   currentPassword: passwordData.currentPassword,
       //   newPassword: passwordData.newPassword
       // }, config);

@@ -61,7 +61,7 @@ const DepartmentList: React.FC = () => {
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/departments', {
+      const response = await axios.get('https://admin-be-qe74.onrender.com/api/departments', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDepartments(response.data);
@@ -87,7 +87,7 @@ const DepartmentList: React.FC = () => {
     setDeleteLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/departments/${deleteDialog.department.dept_id}`, {
+      await axios.delete(`https://admin-be-qe74.onrender.com/api/departments/${deleteDialog.department.dept_id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -124,7 +124,7 @@ const DepartmentList: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/departments', formData, {
+      await axios.post('https://admin-be-qe74.onrender.com/api/departments', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -164,7 +164,7 @@ const DepartmentList: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:5000/api/departments/${editDialog.department.dept_id}`,
+        `https://admin-be-qe74.onrender.com/api/departments/${editDialog.department.dept_id}`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` }

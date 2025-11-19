@@ -88,7 +88,7 @@ const EmployeeForm: React.FC = () => {
   const fetchCurrentUser = async (): Promise<User> => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/auth/me', {
+      const response = await axios.get('https://admin-be-qe74.onrender.com/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCurrentUser(response.data);
@@ -109,7 +109,7 @@ const EmployeeForm: React.FC = () => {
       const token = localStorage.getItem('token');
       const userRole = user?.role || currentUser?.role;
 
-      let url = 'http://localhost:5000/api/departments';
+      let url = 'https://admin-be-qe74.onrender.com/api/departments';
 
       try {
         const response = await axios.get(url, {
@@ -122,9 +122,9 @@ const EmployeeForm: React.FC = () => {
       }
 
       if (userRole === 'HR') {
-        url = 'http://localhost:5000/api/hr/departments';
+        url = 'https://admin-be-qe74.onrender.com/api/hr/departments';
       } else {
-        url = 'http://localhost:5000/api/admin/departments';
+        url = 'https://admin-be-qe74.onrender.com/api/admin/departments';
       }
 
       const response = await axios.get(url, {
@@ -145,9 +145,9 @@ const EmployeeForm: React.FC = () => {
 
       let url = '';
       if (userRole === 'HR') {
-        url = `http://localhost:5000/api/hr/employees/${id}`;
+        url = `https://admin-be-qe74.onrender.com/api/hr/employees/${id}`;
       } else {
-        url = `http://localhost:5000/api/admin/employees/${id}`;
+        url = `https://admin-be-qe74.onrender.com/api/admin/employees/${id}`;
       }
 
       const response = await axios.get(url, {
@@ -205,12 +205,12 @@ const EmployeeForm: React.FC = () => {
       let url = '';
       if (userRole === 'HR') {
         url = isEditMode
-          ? `http://localhost:5000/api/hr/employees/${id}`
-          : 'http://localhost:5000/api/hr/employees';
+          ? `https://admin-be-qe74.onrender.com/api/hr/employees/${id}`
+          : 'https://admin-be-qe74.onrender.com/api/hr/employees';
       } else {
         url = isEditMode
-          ? `http://localhost:5000/api/admin/employees/${id}`
-          : 'http://localhost:5000/api/admin/employees';
+          ? `https://admin-be-qe74.onrender.com/api/admin/employees/${id}`
+          : 'https://admin-be-qe74.onrender.com/api/admin/employees';
       }
 
       let submitData: any = {};
